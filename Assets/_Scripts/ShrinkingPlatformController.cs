@@ -5,11 +5,13 @@ using UnityEngine;
 [System.Serializable]
 public class ShrinkingPlatformController : MonoBehaviour
 {
-    public Transform start;
-    public Transform end;
     public bool isActive;
     public float platformTimer;
     public float threshold;
+    bool IsFloating = false;
+    bool IsShrinking = false;
+    bool IsUnShrinking = false;
+
 
     public PlayerBehaviour player;
 
@@ -19,54 +21,106 @@ public class ShrinkingPlatformController : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<PlayerBehaviour>();
-
-        platformTimer = 0.1f;
-        platformTimer = 0;
+        //StartCoroutine(FloatEffect(transform.position, transform.position.y + 2.0f, 3.0f));
+        //platformTimer = 0.1f;
+        //platformTimer = 0;
         isActive = false;
-        distance = end.position - start.position;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        StartCoroutine(FloatEffect(transform.position, transform.position.y + 1.0f, 2.0f));
         if (isActive)
         {
             platformTimer += Time.deltaTime;
-            _Move();
+            StartCoroutine(ShrinkEffect(transform.localScale.x, 0, 2.0f));
         }
         else
         {
-            if (Vector3.Distance(player.transform.position, start.position) <
-                Vector3.Distance(player.transform.position, end.position))
-            {
-                if (!(Vector3.Distance(transform.position, start.position) < threshold))
-                {
-                    platformTimer += Time.deltaTime;
-                    _Move();
-                }
-            }
-            else
-            {
-                if(!(Vector3.Distance(transform.position, end.position) < threshold))
-                {
-                    platformTimer += Time.deltaTime;
-                    _Move();
-                }
-            }
+            StartCoroutine(UnShrinkEffect(transform.localScale.x, 1, 2.0f));
         }
     }
 
-    private void _Move()
+    IEnumerator FloatEffect(Vector3 StartPos, float EndY ,float Duration)
     {
-        var distanceX = (distance.x > 0) ? start.position.x + Mathf.PingPong(platformTimer, distance.x) : start.position.x;
-        var distanceY = (distance.y > 0) ? start.position.y + Mathf.PingPong(platformTimer, distance.y) : start.position.y;
+        if(!IsFloating)
+        {
+            IsFloating = true;
+            var time = 0.0f;
+        
+            while(time < 1.0f)
+            {
+                transform.position = Vector3.Lerp(StartPos, new Vector3(transform.position.x, EndY, 0), time);
+                time = time + Time.deltaTime / Duration;
+                yield return null;
+            }
 
-        transform.position = new Vector3(distanceX, distanceY, 0.0f);
+            time = 0.0f;
+            while (time < 1.0f)
+            {
+                transform.position = Vector3.Lerp(new Vector3(StartPos.x, EndY,StartPos.z), new Vector3(transform.position.x, StartPos.y, 0), time);
+                time = time + Time.deltaTime / Duration;
+                yield return null;
+            }
+
+            IsUnShrinking = false;
+            IsFloating = false;
+            yield return null;
+        }
+        
     }
 
-    public void Reset()
+    IEnumerator ShrinkEffect(float StartScaleX, float EndScaleX, float Duration)
     {
-        transform.position = start.position;
-        platformTimer = 0;
+        if(!IsShrinking)
+        {
+            IsShrinking = true;
+            var time = 0.0f;
+            while(time < 1.0f)
+            {
+                if(isActive)
+                {
+                    transform.localScale = Vector3.Lerp(new Vector3(StartScaleX, 1, 1), new Vector3(EndScaleX, 1, 1), time);
+                    time = time + Time.deltaTime / Duration;
+                    yield return null;
+                }
+                else
+                {
+                    time = 1f;
+                    yield return null;
+                }
+            }
+
+            IsShrinking = false;
+            yield return null;
+        }
+    }
+
+    IEnumerator UnShrinkEffect(float StartScaleX, float EndScaleX, float Duration)
+    {
+        if (!IsUnShrinking)
+        {
+            IsUnShrinking = true;
+            var time = 0.0f;
+            while (time < 1.0f)
+            {
+                if (!isActive)
+                {
+                    transform.localScale = Vector3.Lerp(new Vector3(StartScaleX, 1, 1), new Vector3(EndScaleX, 1, 1), time);
+                    time = time + Time.deltaTime / Duration;
+                    yield return null;
+                }
+                else
+                {
+                    time = 1f;
+                    yield return null;
+                }
+            }
+
+            IsUnShrinking = false;
+            yield return null;
+        }
     }
 }
