@@ -14,6 +14,9 @@ public class ShrinkingPlatformController : MonoBehaviour
 
 
     public PlayerBehaviour player;
+    public AudioSource ShrinkAudio;
+    public AudioClip PositiveShrink;
+    public AudioClip NegativeShrink;
 
     private Vector3 distance;
 
@@ -21,6 +24,7 @@ public class ShrinkingPlatformController : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<PlayerBehaviour>();
+        ShrinkAudio = GetComponent<AudioSource>();
         //StartCoroutine(FloatEffect(transform.position, transform.position.y + 2.0f, 3.0f));
         //platformTimer = 0.1f;
         //platformTimer = 0;
@@ -77,6 +81,11 @@ public class ShrinkingPlatformController : MonoBehaviour
         if(!IsShrinking)
         {
             IsShrinking = true;
+
+            ShrinkAudio.Stop();
+            ShrinkAudio.clip = NegativeShrink;
+            ShrinkAudio.Play();
+            
             var time = 0.0f;
             while(time < 1.0f)
             {
@@ -103,6 +112,14 @@ public class ShrinkingPlatformController : MonoBehaviour
         if (!IsUnShrinking)
         {
             IsUnShrinking = true;
+
+            if(StartScaleX < 0.9)
+            {
+                ShrinkAudio.Stop();
+                ShrinkAudio.clip = PositiveShrink;
+                ShrinkAudio.Play();
+            }
+            
             var time = 0.0f;
             while (time < 1.0f)
             {
