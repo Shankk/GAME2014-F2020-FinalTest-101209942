@@ -6,8 +6,6 @@ using UnityEngine;
 public class ShrinkingPlatformController : MonoBehaviour
 {
     public bool isActive;
-    public float platformTimer;
-    public float threshold;
     bool IsFloating = false;
     bool IsShrinking = false;
     bool IsUnShrinking = false;
@@ -25,9 +23,6 @@ public class ShrinkingPlatformController : MonoBehaviour
     {
         player = FindObjectOfType<PlayerBehaviour>();
         ShrinkAudio = GetComponent<AudioSource>();
-        //StartCoroutine(FloatEffect(transform.position, transform.position.y + 2.0f, 3.0f));
-        //platformTimer = 0.1f;
-        //platformTimer = 0;
         isActive = false;
     }
 
@@ -38,7 +33,6 @@ public class ShrinkingPlatformController : MonoBehaviour
         StartCoroutine(FloatEffect(transform.position, transform.position.y + 1.0f, 2.0f));
         if (isActive)
         {
-            platformTimer += Time.deltaTime;
             StartCoroutine(ShrinkEffect(transform.localScale.x, 0, 2.0f));
         }
         else
